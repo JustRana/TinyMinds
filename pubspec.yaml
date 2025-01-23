@@ -80,6 +80,8 @@ flutter:
       - assets/colors/images_colors/
       - assets/shapes/audio_shapes/
       - assets/shapes/images_shapes/
+      - assets/audio/
+      - assets/images/game/
 
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

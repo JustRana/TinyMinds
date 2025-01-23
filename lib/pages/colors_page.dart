@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ColorsPage extends StatefulWidget {
   final String title;
@@ -10,14 +11,25 @@ class ColorsPage extends StatefulWidget {
   _ColorsPageState createState() => _ColorsPageState();
 }
 
-class _ColorsPageState extends State<ColorsPage> {
+class _ColorsPageState extends State<ColorsPage> with SingleTickerProviderStateMixin {
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isPlaying = false;
   String _currentAudioPath = '';
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+  }
 
   @override
   void dispose() {
     _audioPlayer.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -64,35 +76,54 @@ class _ColorsPageState extends State<ColorsPage> {
     );
   }
 
-  Widget _buildLetterTile(String letter, String audioPath, String imagePath) {
+  Widget _buildColorTile(String colorName, String audioPath, String imagePath) {
     return GestureDetector(
       onTap: () {
         _playAudio(audioPath);
+        _animationController.forward().then((_) {
+          _animationController.reverse();
+        });
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Color.fromARGB(255, 248, 252, 255),
-          borderRadius: BorderRadius.circular(25),
+      child: ScaleTransition(
+        scale: Tween(begin: 1.0, end: 1.1).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOut,
+          ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(imagePath, height: 110),
-            SizedBox(height: 12.0),
-            Text(
-              letter,
-              style: const TextStyle(
-                color: Color.fromARGB(255, 96, 95, 95),
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Color.fromARGB(255, 248, 252, 255),
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: Offset(0, 3),
               ),
-            ),
-            if (_currentAudioPath == audioPath && _isPlaying)
-              const Icon(
-                Icons.volume_up,
-                color: Color.fromARGB(255, 48, 149, 80),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(imagePath, height: 110),
+              SizedBox(height: 12.0),
+              Text(
+                colorName,
+                style: GoogleFonts.poppins(
+                  color: Color.fromARGB(255, 96, 95, 95),
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-          ],
+              if (_currentAudioPath == audioPath && _isPlaying)
+                const Icon(
+                  Icons.volume_up,
+                  color: Color.fromARGB(255, 48, 149, 80),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -109,19 +140,19 @@ class _ColorsPageState extends State<ColorsPage> {
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: GridView.count(
-          crossAxisCount: 2, 
+          crossAxisCount: 2,
           crossAxisSpacing: 10.0,
           mainAxisSpacing: 10.0,
           children: [
-            _buildLetterTile('Black', 'assets/colors/audio_colors/black.mp3', 'assets/colors/images_colors/black.png'),
-            _buildLetterTile('White', 'assets/colors/audio_colors/white.mp3', 'assets/colors/images_colors/white.png'),
-            _buildLetterTile('Blue', 'assets/colors/audio_colors/blue.mp3', 'assets/colors/images_colors/blue.png'),
-            _buildLetterTile('Green', 'assets/colors/audio_colors/green.mp3', 'assets/colors/images_colors/green.png'),
-            _buildLetterTile('Orange', 'assets/colors/audio_colors/orange.mp3', 'assets/colors/images_colors/orange.png'),
-            _buildLetterTile('Pink', 'assets/colors/audio_colors/pink.mp3', 'assets/colors/images_colors/pink.png'),
-            _buildLetterTile('Purple', 'assets/colors/audio_colors/purple.mp3', 'assets/colors/images_colors/purple.png'),
-            _buildLetterTile('Red', 'assets/colors/audio_colors/red.mp3', 'assets/colors/images_colors/red.png'),
-            _buildLetterTile('Yellow', 'assets/colors/audio_colors/yellow.mp3', 'assets/colors/images_colors/yellow.png'),
+            _buildColorTile('Black', 'assets/colors/audio_colors/black.mp3', 'assets/colors/images_colors/black.png'),
+            _buildColorTile('White', 'assets/colors/audio_colors/white.mp3', 'assets/colors/images_colors/white.png'),
+            _buildColorTile('Blue', 'assets/colors/audio_colors/blue.mp3', 'assets/colors/images_colors/blue.png'),
+            _buildColorTile('Green', 'assets/colors/audio_colors/green.mp3', 'assets/colors/images_colors/green.png'),
+            _buildColorTile('Orange', 'assets/colors/audio_colors/orange.mp3', 'assets/colors/images_colors/orange.png'),
+            _buildColorTile('Pink', 'assets/colors/audio_colors/pink.mp3', 'assets/colors/images_colors/pink.png'),
+            _buildColorTile('Purple', 'assets/colors/audio_colors/purple.mp3', 'assets/colors/images_colors/purple.png'),
+            _buildColorTile('Red', 'assets/colors/audio_colors/red.mp3', 'assets/colors/images_colors/red.png'),
+            _buildColorTile('Yellow', 'assets/colors/audio_colors/yellow.mp3', 'assets/colors/images_colors/yellow.png'),
           ],
         ),
       ),

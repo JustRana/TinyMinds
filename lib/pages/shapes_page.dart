@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ShapesPage extends StatefulWidget {
   final String title;
@@ -10,14 +11,25 @@ class ShapesPage extends StatefulWidget {
   _ShapesPageState createState() => _ShapesPageState();
 }
 
-class _ShapesPageState extends State<ShapesPage> {
+class _ShapesPageState extends State<ShapesPage> with SingleTickerProviderStateMixin {
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isPlaying = false;
   String _currentAudioPath = '';
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+  }
 
   @override
   void dispose() {
     _audioPlayer.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -64,35 +76,54 @@ class _ShapesPageState extends State<ShapesPage> {
     );
   }
 
-  Widget _buildLetterTile(String letter, String audioPath, String imagePath) {
+  Widget _buildShapeTile(String shape, String audioPath, String imagePath) {
     return GestureDetector(
       onTap: () {
         _playAudio(audioPath);
+        _animationController.forward().then((_) {
+          _animationController.reverse();
+        });
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Color.fromARGB(255, 248, 252, 255),
-          borderRadius: BorderRadius.circular(25),
+      child: ScaleTransition(
+        scale: Tween(begin: 1.0, end: 1.1).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOut,
+          ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(imagePath, height: 110),
-            SizedBox(height: 12.0),
-            Text(
-              letter,
-              style: const TextStyle(
-                color: Color.fromARGB(255, 96, 95, 95),
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Color.fromARGB(255, 248, 252, 255),
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: Offset(0, 3),
               ),
-            ),
-            if (_currentAudioPath == audioPath && _isPlaying)
-              const Icon(
-                Icons.volume_up,
-                color: Color.fromARGB(255, 48, 149, 80),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(imagePath, height: 110),
+              SizedBox(height: 12.0),
+              Text(
+                shape,
+                style: GoogleFonts.poppins(
+                  color: Color.fromARGB(255, 96, 95, 95),
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-          ],
+              if (_currentAudioPath == audioPath && _isPlaying)
+                const Icon(
+                  Icons.volume_up,
+                  color: Color.fromARGB(255, 48, 149, 80),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -109,16 +140,16 @@ class _ShapesPageState extends State<ShapesPage> {
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: GridView.count(
-          crossAxisCount: 2, 
+          crossAxisCount: 2,
           crossAxisSpacing: 10.0,
           mainAxisSpacing: 10.0,
           children: [
-            _buildLetterTile('Star', 'assets/shapes/audio_shapes/starr.mp3', 'assets/shapes/images_shapes/star.png'),
-            _buildLetterTile('Circle', 'assets/shapes/audio_shapes/circle.mp3', 'assets/shapes/images_shapes/cicle.png'),
-            _buildLetterTile('Square', 'assets/shapes/audio_shapes/square.mp3', 'assets/shapes/images_shapes/square.png'),
-            _buildLetterTile('Tringle', 'assets/shapes/audio_shapes/triangle.mp3', 'assets/shapes/images_shapes/triangle.png'),
-            _buildLetterTile('Rectangular', 'assets/shapes/audio_shapes/rectangle.mp3', 'assets/shapes/images_shapes/rectangle.png'),
-            _buildLetterTile('heart', 'assets/shapes/audio_shapes/heart.mp3', 'assets/shapes/images_shapes/heart.png'),
+            _buildShapeTile('Star', 'assets/shapes/audio_shapes/starr.mp3', 'assets/shapes/images_shapes/star.png'),
+            _buildShapeTile('Circle', 'assets/shapes/audio_shapes/circle.mp3', 'assets/shapes/images_shapes/cicle.png'),
+            _buildShapeTile('Square', 'assets/shapes/audio_shapes/square.mp3', 'assets/shapes/images_shapes/square.png'),
+            _buildShapeTile('Triangle', 'assets/shapes/audio_shapes/triangle.mp3', 'assets/shapes/images_shapes/triangle.png'),
+            _buildShapeTile('Rectangle', 'assets/shapes/audio_shapes/rectangle.mp3', 'assets/shapes/images_shapes/rectangle.png'),
+            _buildShapeTile('Heart', 'assets/shapes/audio_shapes/heart.mp3', 'assets/shapes/images_shapes/heart.png'),
           ],
         ),
       ),

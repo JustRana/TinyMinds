@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LettersPage extends StatefulWidget {
   final String title;
@@ -10,14 +11,25 @@ class LettersPage extends StatefulWidget {
   _LettersPageState createState() => _LettersPageState();
 }
 
-class _LettersPageState extends State<LettersPage> {
+class _LettersPageState extends State<LettersPage> with SingleTickerProviderStateMixin {
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isPlaying = false;
   String _currentAudioPath = '';
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+  }
 
   @override
   void dispose() {
     _audioPlayer.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -68,31 +80,50 @@ class _LettersPageState extends State<LettersPage> {
     return GestureDetector(
       onTap: () {
         _playAudio(audioPath);
+        _animationController.forward().then((_) {
+          _animationController.reverse();
+        });
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Color.fromARGB(255, 248, 252, 255),
-          borderRadius: BorderRadius.circular(25),
+      child: ScaleTransition(
+        scale: Tween(begin: 1.0, end: 1.1).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOut,
+          ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(imagePath, height: 110),
-            SizedBox(height: 12.0),
-            Text(
-              letter,
-              style: const TextStyle(
-                color: Color.fromARGB(255, 96, 95, 95),
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Color.fromARGB(255, 248, 252, 255),
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: Offset(0, 3),
               ),
-            ),
-            if (_currentAudioPath == audioPath && _isPlaying)
-              const Icon(
-                Icons.volume_up,
-                color: Color.fromARGB(255, 48, 149, 80),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(imagePath, height: 110),
+              SizedBox(height: 12.0),
+              Text(
+                letter,
+                style: GoogleFonts.poppins(
+                  color: Color.fromARGB(255, 96, 95, 95),
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-          ],
+              if (_currentAudioPath == audioPath && _isPlaying)
+                const Icon(
+                  Icons.volume_up,
+                  color: Color.fromARGB(255, 48, 149, 80),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -139,7 +170,6 @@ class _LettersPageState extends State<LettersPage> {
             _buildLetterTile('X', 'assets/letters/audio/kid-x.mp3', 'assets/letters/images_letters/X.png'),
             _buildLetterTile('Y', 'assets/letters/audio/kid-y.mp3', 'assets/letters/images_letters/Y.png'),
             _buildLetterTile('Z', 'assets/letters/audio/kid-z.mp3', 'assets/letters/images_letters/Z.png'),
-          
           ],
         ),
       ),

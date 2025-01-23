@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tiny_minds/pages/itemModel.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class GamePage extends StatefulWidget {
   @override
@@ -11,6 +12,7 @@ class _GamePageState extends State<GamePage> {
   List<ItemModel> items2 = [];
   int score = 0;
   bool gameOver = false;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -36,6 +38,31 @@ class _GamePageState extends State<GamePage> {
     items2 = List<ItemModel>.from(items);
     items.shuffle();
     items2.shuffle();
+  }
+
+  void _playAudio(String audioPath) async {
+    try {
+      await _audioPlayer.play(DeviceFileSource(audioPath));
+    } catch (e) {
+      print('Audio player error occurred: $e');
+      _showErrorDialog();
+    }
+  }
+
+  void _showErrorDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Audio Player Error'),
+        content: Text('An error occurred while playing the audio.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -106,11 +133,13 @@ class _GamePageState extends State<GamePage> {
                                 items2.remove(item);
                                 score += 10;
                                 item.accepting = false;
+                                _playAudio('assets/audio/correct.mp3');
                               });
                             } else {
                               setState(() {
                                 score -= 5;
                                 item.accepting = false;
+                                _playAudio('assets/audio/wrong.mp3');
                               });
                             }
                           },
@@ -198,6 +227,3 @@ class _GamePageState extends State<GamePage> {
     }
   }
 }
-                            
-
-

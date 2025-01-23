@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AnimalsPage extends StatefulWidget {
   final String title;
@@ -10,14 +11,25 @@ class AnimalsPage extends StatefulWidget {
   _AnimalsPageState createState() => _AnimalsPageState();
 }
 
-class _AnimalsPageState extends State<AnimalsPage> {
+class _AnimalsPageState extends State<AnimalsPage> with SingleTickerProviderStateMixin {
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isPlaying = false;
   String _currentAudioPath = '';
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+  }
 
   @override
   void dispose() {
     _audioPlayer.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -68,31 +80,50 @@ class _AnimalsPageState extends State<AnimalsPage> {
     return GestureDetector(
       onTap: () {
         _playAudio(audioPath);
+        _animationController.forward().then((_) {
+          _animationController.reverse();
+        });
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Color.fromARGB(255, 248, 252, 255),
-          borderRadius: BorderRadius.circular(25),
+      child: ScaleTransition(
+        scale: Tween(begin: 1.0, end: 1.1).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOut,
+          ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(imagePath, height: 110),
-            SizedBox(height: 12.0),
-            Text(
-              animal,
-              style: const TextStyle(
-                color: Color.fromARGB(255, 96, 95, 95),
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Color.fromARGB(255, 248, 252, 255),
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: Offset(0, 3),
               ),
-            ),
-            if (_currentAudioPath == audioPath && _isPlaying)
-              const Icon(
-                Icons.volume_up,
-                color: Color.fromARGB(255, 48, 149, 80),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(imagePath, height: 110),
+              SizedBox(height: 12.0),
+              Text(
+                animal,
+                style: GoogleFonts.poppins(
+                  color: Color.fromARGB(255, 96, 95, 95),
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-          ],
+              if (_currentAudioPath == audioPath && _isPlaying)
+                const Icon(
+                  Icons.volume_up,
+                  color: Color.fromARGB(255, 48, 149, 80),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -109,7 +140,7 @@ class _AnimalsPageState extends State<AnimalsPage> {
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: GridView.count(
-          crossAxisCount: 2, 
+          crossAxisCount: 2,
           crossAxisSpacing: 10.0,
           mainAxisSpacing: 10.0,
           children: [
